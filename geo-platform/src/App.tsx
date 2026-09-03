@@ -1,27 +1,25 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { MapView } from './features/map/MapView'
+import type { AreaOfInterest } from './features/aois/types'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [aois] = useState<AreaOfInterest[]>([{
+    id: crypto.randomUUID(),
+    name: 'Area of Interest 1',
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[[0, 0], [50, 0], [50, 50], [0, 50], [0, 0]]]
+    },
+    createdAt: new Date().toISOString(),
+  }])
 
   return (
-    <>
-      <section id="center">
-        <div>
-          <h1>Get started</h1>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-    </>
+    <div className="app">
+      <header>ATLAS {aois[0].name}</header>
+      <main>
+        <MapView aois={aois}/>
+      </main>
+    </div>
   )
 }
 

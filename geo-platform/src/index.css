@@ -71,6 +71,49 @@ header {
   z-index: 1000;
 }
 
+.aoi-inspector-container {
+  width: 280px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  z-index: 1000;
+  padding: 16px;
+}
+
+.workspace {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.toolbar button {
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+.toolbar button:hover:not(:disabled) {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+.toolbar button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+
 body {
   margin: 0;
 }

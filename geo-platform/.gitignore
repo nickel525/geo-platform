@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Full source extracts — keep the semiconductor slice in git
+scripts/ingest/raw/sampoq-supply-chain.csv

@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2026-09-05T04:43:29.834Z",
+  "entityCount": 194,
+  "relationshipCount": 523,
+  "byType": {
+    "company": 143,
+    "facility": 19,
+    "power_infrastructure": 12,
+    "transport_infrastructure": 14,
+    "airport": 5,
+    "port": 1
+  },
+  "relationshipTypes": {
+    "supplies": 255,
+    "customer_of": 255,
+    "operates": 13
+  },
+  "sources": {
+    "sampoq": {
+      "dataset": "SAMPOQ/supply-chain-10k",
+      "license": "CC BY 4.0",
+      "attribution": "Sampoq — https://www.sampoq.com",
+      "rowsIngested": 141
+    },
+    "sectivia": {
+      "dataset": "Sectivia U.S. supply-chain graph",
+      "license": "CC BY 4.0",
+      "attribution": "Sectivia (https://sectivia.com), CC BY 4.0",
+      "url": "https://sectivia.com/dataset/",
+      "caveat": "Relationships were assembled by hand from company filings, investor presentations, product documentation and industry reporting. Some are stated outright by one of the two parties; others are a reasoned inference from what a company sells and who buys that category. Detailed supplier lists are commercially confidential almost everywhere, so no public map of this kind can be complete or fully sourced. Treat it as a researched starting point, not a register of contracts.",
+      "companiesIngested": 67,
+      "relationsIngested": 122
+    },
+    "openSupplyHub": {
+      "dataset": "Open Supply Hub facilities GeoJSON",
+      "featuresIngested": 0,
+      "linkedToCompanies": 0
+    },
+    "openStreetMap": {
+      "dataset": "OpenStreetMap Overpass extract",
+      "license": "ODbL",
+      "attribution": "© OpenStreetMap contributors",
+      "ports": 1,
+      "airports": 5,
+      "power": 12,
+      "transport": 14,
+      "facilities": 19,
+      "operates": 13
+    }
+  }
+}

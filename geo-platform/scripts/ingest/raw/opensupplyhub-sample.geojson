@@ -1,0 +1,5 @@
+{
+  "type": "FeatureCollection",
+  "features": [],
+  "note": "OS Hub API requires a token. Place an exported GeoJSON search here or set OSH_API_TOKEN."
+}

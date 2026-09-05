@@ -1,9 +1,12 @@
+import { operatedSiteIds } from '../../lib/graph'
 import { useWorkspace } from '../../state/useWorkspace'
 import { MapView } from './MapView'
 
 export function MapPane() {
   const {
     aois,
+    entities,
+    relationships,
     mapEntities,
     events,
     isDrawing,
@@ -15,7 +18,14 @@ export function MapPane() {
     finishAoi,
     select,
     setViewportBbox,
+    selectedEntity,
   } = useWorkspace()
+
+  const relatedSites = selectedEntity
+    ? operatedSiteIds(selectedEntity.id, relationships)
+        .map((id) => entities.find((entity) => entity.id === id))
+        .filter((entity): entity is NonNullable<typeof entity> => Boolean(entity?.geometry))
+    : []
 
   return (
     <div className="map-pane">
@@ -24,6 +34,7 @@ export function MapPane() {
         entities={mapEntities}
         events={events}
         visibleEntityIds={mapEntities.map((entity) => entity.id)}
+        relatedSites={relatedSites}
         isDrawing={isDrawing}
         draftPositions={draftPositions}
         selection={selection}

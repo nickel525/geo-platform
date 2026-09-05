@@ -42,6 +42,30 @@ export function polygonBbox(
   ]
 }
 
+export function entitiesBbox(
+  entities: Entity[],
+): [[number, number], [number, number]] | null {
+  const points = entities.flatMap((entity) => {
+    const box = entityBbox(entity)
+    return box ? [box[0], box[1]] : []
+  })
+  if (points.length === 0) return null
+  let west = Infinity
+  let south = Infinity
+  let east = -Infinity
+  let north = -Infinity
+  for (const [lng, lat] of points) {
+    west = Math.min(west, lng)
+    south = Math.min(south, lat)
+    east = Math.max(east, lng)
+    north = Math.max(north, lat)
+  }
+  return [
+    [west, south],
+    [east, north],
+  ]
+}
+
 export function entityBbox(
   entity: Entity,
 ): [[number, number], [number, number]] | null {

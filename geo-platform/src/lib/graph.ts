@@ -86,6 +86,24 @@ export function downstreamIds(
     .map((hop) => hop.entityId)
 }
 
+export function operatedSiteIds(
+  companyId: string,
+  relationships: Relationship[],
+): string[] {
+  return relationships
+    .filter((rel) => rel.type === 'operates' && rel.fromId === companyId)
+    .map((rel) => rel.toId)
+}
+
+export function operatorIds(
+  facilityId: string,
+  relationships: Relationship[],
+): string[] {
+  return relationships
+    .filter((rel) => rel.type === 'operates' && rel.toId === facilityId)
+    .map((rel) => rel.fromId)
+}
+
 export function relationshipsFor(
   entityId: string,
   relationships: Relationship[],

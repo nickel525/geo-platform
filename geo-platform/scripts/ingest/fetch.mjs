@@ -5,12 +5,18 @@ import { homedir } from 'node:os'
 
 import { buildOverpassQuery } from './adapters/osm.mjs'
 import { filterSampoqCsv } from './adapters/sampoq.mjs'
-import { emptyOshCollection, oshSearchUrls } from './adapters/opensupplyhub.mjs'
+import {
+  collectionFromOshCsv,
+  emptyOshCollection,
+  isPlaceholderOsh,
+  oshSearchQueries,
+} from './adapters/opensupplyhub.mjs'
 import {
   COMPANY_PROFILES,
   OSM_REGIONS,
   OVERPASS_URL,
   OSH_API_URL,
+  OSH_PAGE_LIMIT,
   SAMPOQ_CSV_URL,
 } from './config.mjs'
 
@@ -21,11 +27,13 @@ export const PATHS = {
   sampoqFull: join(RAW_DIR, 'sampoq-supply-chain.csv'),
   sampoqSlice: join(RAW_DIR, 'sampoq-semiconductor.csv'),
   osh: join(RAW_DIR, 'opensupplyhub-sample.geojson'),
+  oshCsv: join(RAW_DIR, 'opensupplyhub.csv'),
   osm: join(RAW_DIR, 'osm-overpass.json'),
   sectivia: join(RAW_DIR, 'sectivia-supply-chain.json'),
 }
 
 export async function ensureRawSources({ refresh = false } = {}) {
+  await loadLocalEnv()
   await mkdir(RAW_DIR, { recursive: true })
 
   if (refresh || !(await exists(PATHS.sampoqSlice))) {
@@ -46,17 +54,7 @@ export async function ensureRawSources({ refresh = false } = {}) {
     console.log('Using existing OSM Overpass extract')
   }
 
-  if (!(await exists(PATHS.osh))) {
-    const live = await fetchOshIfTokenized()
-    await writeFile(PATHS.osh, JSON.stringify(live ?? emptyOshCollection(), null, 2), 'utf8')
-    console.log(
-      live
-        ? `Open Supply Hub features: ${live.features?.length ?? 0}`
-        : 'Open Supply Hub: no token; wrote empty sample adapter input',
-    )
-  } else {
-    console.log('Using existing Open Supply Hub sample')
-  }
+  await ensureOshSource(refresh)
 
   if (!(await exists(PATHS.sectivia))) {
     const downloaded = join(homedir(), 'Downloads', 'sectivia-supply-chain.json')
@@ -105,23 +103,103 @@ async function postOverpass(query) {
   return response.json()
 }
 
-async function fetchOshIfTokenized() {
-  const token = process.env.OSH_API_TOKEN
-  if (!token) return null
-
-  const features = []
-  for (const url of oshSearchUrls(COMPANY_PROFILES)) {
-    const response = await fetch(url.startsWith('http') ? url : `${OSH_API_URL}?q=TSMC`, {
-      headers: { Authorization: `Token ${token}`, 'User-Agent': 'ATLAS-dev-ingest/0.1' },
-    })
-    if (!response.ok) {
-      console.warn(`OSH fetch ${url} failed: ${response.status}`)
-      continue
-    }
-    const body = await response.json()
-    features.push(...(body.features ?? []))
+async function ensureOshSource(refresh) {
+  if (await exists(PATHS.oshCsv)) {
+    const collection = collectionFromOshCsv(await readFile(PATHS.oshCsv, 'utf8'))
+    await writeFile(PATHS.osh, JSON.stringify(collection, null, 2), 'utf8')
+    console.log(`Open Supply Hub CSV export: ${collection.features.length} rows`)
+    return
   }
-  return { type: 'FeatureCollection', features }
+
+  const existing = (await exists(PATHS.osh))
+    ? JSON.parse(await readFile(PATHS.osh, 'utf8'))
+    : null
+  const token = process.env.OSH_API_TOKEN?.trim()
+  const shouldFetch = Boolean(token) && (refresh || !existing || isPlaceholderOsh(existing))
+
+  if (shouldFetch) {
+    const live = await fetchOshApi(token)
+    await writeFile(PATHS.osh, JSON.stringify(live, null, 2), 'utf8')
+    console.log(`Open Supply Hub API features: ${live.features.length}`)
+    return
+  }
+
+  if (existing) {
+    console.log(
+      isPlaceholderOsh(existing)
+        ? oshSetupHint()
+        : `Using existing Open Supply Hub extract (${existing.features.length} features)`,
+    )
+    return
+  }
+
+  await writeFile(PATHS.osh, JSON.stringify(emptyOshCollection(), null, 2), 'utf8')
+  console.log(oshSetupHint())
+}
+
+async function fetchOshApi(token) {
+  const byId = new Map()
+  for (const query of oshSearchQueries(COMPANY_PROFILES)) {
+    for (let page = 1; page <= OSH_PAGE_LIMIT; page += 1) {
+      const url = new URL(OSH_API_URL)
+      for (const [key, value] of Object.entries(query)) url.searchParams.set(key, value)
+      url.searchParams.set('page', String(page))
+      url.searchParams.set('pageSize', '50')
+      url.searchParams.set('number_of_public_contributors', 'true')
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Token ${token}`,
+          'User-Agent': 'ATLAS-dev-ingest/0.1',
+        },
+      })
+      if (response.status === 401 || response.status === 403) {
+        throw new Error(
+          `Open Supply Hub rejected the API token (${response.status}). Check OSH_API_TOKEN.`,
+        )
+      }
+      if (!response.ok) {
+        console.warn(`OSH ${url} failed: ${response.status}`)
+        break
+      }
+      const body = await response.json()
+      for (const feature of body.features ?? []) {
+        const id = feature.id || feature.properties?.os_id
+        if (id) byId.set(String(id), feature)
+      }
+      if (!body.next || (body.features?.length ?? 0) === 0) break
+      await wait(200)
+    }
+  }
+  return { type: 'FeatureCollection', features: [...byId.values()] }
+}
+
+function oshSetupHint() {
+  return [
+    'Open Supply Hub: no facilities yet.',
+    'Free path: create an account at https://opensupplyhub.org, search Electronics or Foxconn, download CSV, save as scripts/ingest/raw/opensupplyhub.csv',
+    'API path: My Account > Settings > API token (trial/subscription), set OSH_API_TOKEN, then npm run ingest -- --refresh',
+  ].join('\n')
+}
+
+async function loadLocalEnv() {
+  const candidates = [
+    join(root, '../../.env'),
+    join(root, '../.env'),
+    join(root, '.env'),
+  ]
+  for (const path of candidates) {
+    if (!(await exists(path))) continue
+    const text = await readFile(path, 'utf8')
+    for (const line of text.split(/\r?\n/)) {
+      const match = line.match(/^OSH_API_TOKEN=(.*)$/)
+      if (!match || process.env.OSH_API_TOKEN) continue
+      process.env.OSH_API_TOKEN = match[1].trim().replace(/^["']|["']$/g, '')
+    }
+  }
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 async function exists(path) {

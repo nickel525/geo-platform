@@ -4,7 +4,7 @@ import * as maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 
-import { entityBbox, polygonBbox } from '../../lib/geo'
+import { entitiesBbox, entityBbox, polygonBbox } from '../../lib/geo'
 import {
   aoisToFeatureCollection,
   draftToGeoJSON,
@@ -20,6 +20,7 @@ type MapViewProps = {
   entities: Entity[]
   events: AtlasEvent[]
   visibleEntityIds: string[]
+  relatedSites: Entity[]
   isDrawing: boolean
   draftPositions: Position[]
   selection: Selection
@@ -38,6 +39,7 @@ export function MapView({
   entities,
   events,
   visibleEntityIds,
+  relatedSites,
   isDrawing,
   draftPositions,
   selection,
@@ -60,6 +62,7 @@ export function MapView({
   const eventsRef = useRef(events)
   const selectionRef = useRef(selection)
   const visibleEntityIdsRef = useRef(visibleEntityIds)
+  const relatedSitesRef = useRef(relatedSites)
   const disruptedIdsRef = useRef(disruptedIds)
   const affectedIdsRef = useRef(affectedIds)
 
@@ -74,6 +77,7 @@ export function MapView({
     eventsRef.current = events
     selectionRef.current = selection
     visibleEntityIdsRef.current = visibleEntityIds
+    relatedSitesRef.current = relatedSites
     disruptedIdsRef.current = disruptedIds
     affectedIdsRef.current = affectedIds
   }, [
@@ -87,6 +91,7 @@ export function MapView({
     events,
     selection,
     visibleEntityIds,
+    relatedSites,
     disruptedIds,
     affectedIds,
   ])
@@ -399,7 +404,7 @@ export function MapView({
     }
     if (selection?.kind === 'entity') {
       const entity = entitiesRef.current.find((item) => item.id === selection.id)
-      const box = entity ? entityBbox(entity) : null
+      const box = (entity ? entityBbox(entity) : null) ?? entitiesBbox(relatedSitesRef.current)
       if (box) {
         map.fitBounds(box, { padding: 80, maxZoom: 8, duration: 700 })
       }

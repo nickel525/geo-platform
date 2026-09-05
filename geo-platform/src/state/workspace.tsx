@@ -3,7 +3,7 @@ import type { Position } from 'geojson'
 
 import { loadCatalog } from '../data/loadCatalog'
 import { createAoi, entitiesInsideAoi, pointCoordinates } from '../lib/geo'
-import { directNeighborhood, traverseImpact } from '../lib/graph'
+import { directNeighborhood, operatedSiteIds, traverseImpact } from '../lib/graph'
 import type {
   AreaOfInterest,
   Entity,
@@ -99,12 +99,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         (kindFilter === 'all' || entity.kind === kindFilter) && inBbox(entity, bbox),
     )
     const pinned = new Set(disruptedIds)
-    if (selection?.kind === 'entity') pinned.add(selection.id)
+    if (selection?.kind === 'entity') {
+      pinned.add(selection.id)
+      for (const id of operatedSiteIds(selection.id, relationships)) pinned.add(id)
+    }
     return [
       ...visible,
       ...mapped.filter((entity) => pinned.has(entity.id) && !visible.some((item) => item.id === entity.id)),
     ]
-  }, [entities, kindFilter, bbox, disruptedIds, selection])
+  }, [entities, kindFilter, bbox, disruptedIds, selection, relationships])
 
   const affectedIds = useMemo(() => {
     if (disruptedIds.length === 0) return []

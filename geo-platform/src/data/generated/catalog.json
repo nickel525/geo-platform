@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-05T04:43:29.834Z",
+  "generatedAt": "2026-09-05T04:51:36.713Z",
   "entities": [
     {
       "id": "company:acn:a4aacca5",
@@ -3200,8 +3200,8 @@
       }
     },
     {
-      "id": "company:3231:1b251f64",
-      "name": "Wistron Corporation",
+      "id": "company:wistron",
+      "name": "Wistron",
       "type": "company",
       "metadata": {
         "sourceNames": [
@@ -3209,7 +3209,7 @@
         ],
         "ticker": "3231",
         "reviewFlag": false,
-        "matchedOn": null,
+        "matchedOn": "ticker:3231",
         "originalName": "Wistron Corporation"
       }
     },
@@ -5158,7 +5158,7 @@
     },
     {
       "type": "supplies",
-      "sourceEntityId": "company:3231:1b251f64",
+      "sourceEntityId": "company:wistron",
       "targetEntityId": "company:nvidia",
       "confidence": 0.72,
       "evidence": [
@@ -5177,12 +5177,12 @@
         "filingRelation": "supplier",
         "note": "NVIDIA CORP 10-K named Wistron Corporation as a supplier"
       },
-      "id": "rel:company-3231-1b251f64-supplies-company-nvidia:14d11fea"
+      "id": "rel:company-wistron-supplies-company-nvidia:086411ae"
     },
     {
       "type": "customer_of",
       "sourceEntityId": "company:nvidia",
-      "targetEntityId": "company:3231:1b251f64",
+      "targetEntityId": "company:wistron",
       "confidence": 0.72,
       "evidence": [
         {
@@ -5197,7 +5197,7 @@
         "filingRelation": "supplier",
         "note": "NVIDIA CORP 10-K named Wistron Corporation as a supplier"
       },
-      "id": "rel:company-nvidia-customer-of-company-3231-1b251f64:fc6747fd"
+      "id": "rel:company-nvidia-customer-of-company-wistron:8249f8ef"
     },
     {
       "type": "supplies",

@@ -1,6 +1,8 @@
 import { formatArea } from '../../lib/geo'
 import {
   downstreamIds,
+  operatedSiteIds,
+  operatorIds,
   relationshipLabel,
   relationshipsFor,
   upstreamIds,
@@ -89,6 +91,8 @@ export function Inspector() {
     const rels = relationshipsFor(selectedEntity.id, relationships)
     const up = upstreamIds(selectedEntity.id, relationships)
     const down = downstreamIds(selectedEntity.id, relationships)
+    const sites = operatedSiteIds(selectedEntity.id, relationships)
+    const operators = operatorIds(selectedEntity.id, relationships)
     const relatedEvents = events.filter((event) =>
       event.entityIds.includes(selectedEntity.id),
     )
@@ -128,6 +132,23 @@ export function Inspector() {
               <dd>Needs review — not merged with a similar name</dd>
             </div>
           ) : null}
+          <MetaLine label="Address" value={selectedEntity.metadata.address} />
+          <MetaLine label="Country" value={selectedEntity.metadata.countryName} />
+          <MetaLine label="Parent company" value={selectedEntity.metadata.parentCompany} />
+          <MetaLine label="Sector" value={selectedEntity.metadata.sector} />
+          <MetaLine label="Product" value={selectedEntity.metadata.productType} />
+          <MetaLine label="Workers" value={selectedEntity.metadata.workers} />
+          <MetaLine label="OS ID" value={selectedEntity.metadata.osId} />
+          {typeof selectedEntity.metadata.sourceUrl === 'string' && (
+            <div>
+              <dt>Source</dt>
+              <dd>
+                <a href={selectedEntity.metadata.sourceUrl} target="_blank" rel="noreferrer">
+                  Open Supply Hub profile
+                </a>
+              </dd>
+            </div>
+          )}
         </dl>
 
         <div className="stack">
@@ -138,6 +159,27 @@ export function Inspector() {
             Open dependency graph
           </button>
         </div>
+
+        {sites.length > 0 && (
+          <>
+            <h4>Sites</h4>
+            <EntityIdList
+              ids={sites}
+              entities={entities}
+              onPick={(id) => select({ kind: 'entity', id })}
+            />
+          </>
+        )}
+        {operators.length > 0 && (
+          <>
+            <h4>Operator</h4>
+            <EntityIdList
+              ids={operators}
+              entities={entities}
+              onPick={(id) => select({ kind: 'entity', id })}
+            />
+          </>
+        )}
 
         <h4>Upstream</h4>
         <EntityIdList ids={up} entities={entities} onPick={(id) => select({ kind: 'entity', id })} />
@@ -265,6 +307,16 @@ export function Inspector() {
     <aside className="inspector">
       <p className="muted">Record not found.</p>
     </aside>
+  )
+}
+
+function MetaLine({ label, value }: { label: string; value: unknown }) {
+  if (typeof value !== 'string' || !value.trim()) return null
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd>{value}</dd>
+    </div>
   )
 }
 

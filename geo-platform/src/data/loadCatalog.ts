@@ -22,7 +22,20 @@ function describe(entity: AtlasEntity): string {
   const sourceNames = Array.isArray(entity.metadata.sourceNames)
     ? entity.metadata.sourceNames.filter((name): name is string => typeof name === 'string')
     : []
-  const parts = [`${entity.type.replaceAll('_', ' ')} from the ATLAS development catalog.`]
+  const source = entity.metadata.source
+  const parts = [
+    source === 'open_supply_hub'
+      ? 'Production location from Open Supply Hub.'
+      : `${entity.type.replaceAll('_', ' ')} from the ATLAS development catalog.`,
+  ]
+  const address = typeof entity.metadata.address === 'string' ? entity.metadata.address : null
+  const country =
+    typeof entity.metadata.countryName === 'string' ? entity.metadata.countryName : null
+  const parent =
+    typeof entity.metadata.parentCompany === 'string' ? entity.metadata.parentCompany : null
+  if (address) parts.push(address + (country ? `, ${country}` : ''))
+  else if (country) parts.push(country)
+  if (parent) parts.push(`Parent company: ${parent}.`)
   if (original && original !== entity.name) {
     parts.push(`Source name: ${original}.`)
   } else if (sourceNames[0] && sourceNames[0] !== entity.name) {

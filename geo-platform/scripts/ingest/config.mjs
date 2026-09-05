@@ -227,6 +227,48 @@ export const COMPANY_PROFILES = [
     tickers: ['2317', 'HNHPF'],
   },
   {
+    id: 'wistron',
+    canonicalName: 'Wistron',
+    aliases: ['Wistron Corporation', 'Wistron Corp'],
+    tickers: ['3231'],
+  },
+  {
+    id: 'pegatron',
+    canonicalName: 'Pegatron',
+    aliases: ['Pegatron Corporation', 'Pegatron Corp'],
+    tickers: ['4938'],
+  },
+  {
+    id: 'luxshare',
+    canonicalName: 'Luxshare Precision',
+    aliases: ['Luxshare', 'Luxshare Precision Industry'],
+    tickers: ['002475'],
+  },
+  {
+    id: 'quanta',
+    canonicalName: 'Quanta Computer',
+    aliases: ['Quanta'],
+    tickers: ['2382'],
+  },
+  {
+    id: 'compal',
+    canonicalName: 'Compal Electronics',
+    aliases: ['Compal'],
+    tickers: ['2324'],
+  },
+  {
+    id: 'jabil',
+    canonicalName: 'Jabil',
+    aliases: ['Jabil Inc', 'Jabil Circuit'],
+    tickers: ['JBL'],
+  },
+  {
+    id: 'flex',
+    canonicalName: 'Flex',
+    aliases: ['Flex Ltd', 'Flextronics'],
+    tickers: ['FLEX'],
+  },
+  {
     id: 'samsung-electronics',
     canonicalName: 'Samsung Electronics',
     aliases: ['Samsung Electronics Co'],
@@ -332,3 +374,4 @@ export const OSM_REGIONS = [
 export const SAMPOQ_CSV_URL = 'https://api.sampoq.com/datasets/supply-chain.csv'
 export const OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 export const OSH_API_URL = 'https://opensupplyhub.org/api/facilities/'
+export const OSH_PAGE_LIMIT = 4
